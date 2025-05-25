@@ -7,6 +7,8 @@ public class AppDbContext : DbContext
     public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<Imovel> Imoveis { get; set; }
     public DbSet<Pregao> Pregoes { get; set; }
+    public DbSet<Lance> Lances { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -22,6 +24,19 @@ public class AppDbContext : DbContext
             .HasOne(i => i.Usuario)
             .WithMany()
             .HasForeignKey(i => i.UsuarioId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        //Para o Lance
+        modelBuilder.Entity<Lance>()
+            .HasOne(l => l.Usuario)
+            .WithMany()
+            .HasForeignKey(l => l.UsuarioId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Lance>()
+            .HasOne(l => l.Pregao)
+            .WithMany()
+            .HasForeignKey(l => l.PregaoId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 
