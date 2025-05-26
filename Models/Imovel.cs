@@ -30,7 +30,7 @@ namespace LanceCertoSQL.Models
         
         [Display(Name = "Descrição")]
         [DataType(DataType.MultilineText)]
-        public string Descricao { get; set; }
+        public string? Descricao { get; set; }
 
     }
 }

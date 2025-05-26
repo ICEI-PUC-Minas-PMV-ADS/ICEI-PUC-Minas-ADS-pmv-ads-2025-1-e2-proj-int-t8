@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     ));
 
 var app = builder.Build();
+
+//var supportedCultures = new[] { new CultureInfo("pt-BR") };
+//app.UseRequestLocalization(new RequestLocalizationOptions
+//{
+//    DefaultRequestCulture = new RequestCulture("pt-BR"),
+//    SupportedCultures = supportedCultures,
+//    SupportedUICultures = supportedCultures
+//});
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
