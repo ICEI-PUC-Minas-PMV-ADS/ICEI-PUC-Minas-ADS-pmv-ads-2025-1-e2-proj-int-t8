@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LanceCertoSQL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250526140425_AddVencedorPregao")]
+    partial class AddVencedorPregao
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,6 +38,7 @@ namespace LanceCertoSQL.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Descricao")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Foto")
@@ -48,12 +52,17 @@ namespace LanceCertoSQL.Migrations
                     b.Property<int>("UsuarioId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("UsuarioId1")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("ValorEstimado")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UsuarioId");
+
+                    b.HasIndex("UsuarioId1");
 
                     b.ToTable("Imoveis");
                 });
@@ -174,10 +183,14 @@ namespace LanceCertoSQL.Migrations
             modelBuilder.Entity("LanceCertoSQL.Models.Imovel", b =>
                 {
                     b.HasOne("LanceCertoSQL.Models.Usuario", "Usuario")
-                        .WithMany("Imoveis")
+                        .WithMany()
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("LanceCertoSQL.Models.Usuario", null)
+                        .WithMany("Imoveis")
+                        .HasForeignKey("UsuarioId1");
 
                     b.Navigation("Usuario");
                 });
@@ -185,7 +198,7 @@ namespace LanceCertoSQL.Migrations
             modelBuilder.Entity("LanceCertoSQL.Models.Lance", b =>
                 {
                     b.HasOne("LanceCertoSQL.Models.Pregao", "Pregao")
-                        .WithMany("Lances")
+                        .WithMany()
                         .HasForeignKey("PregaoId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -224,11 +237,6 @@ namespace LanceCertoSQL.Migrations
                     b.Navigation("Usuario");
 
                     b.Navigation("UsuarioVencedor");
-                });
-
-            modelBuilder.Entity("LanceCertoSQL.Models.Pregao", b =>
-                {
-                    b.Navigation("Lances");
                 });
 
             modelBuilder.Entity("LanceCertoSQL.Models.Usuario", b =>

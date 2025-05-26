@@ -36,7 +36,10 @@ namespace LanceCertoSQL.Controllers
             var pregao = await _context.Pregoes
                 .Include(p => p.Imovel)
                 .Include(p => p.Usuario)
+                .Include(p => p.Lances)                      // Inclui a lista de lances
+                    .ThenInclude(l => l.Usuario)             // Inclui o usuário de cada lance
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (pregao == null)
             {
                 return NotFound();
@@ -61,6 +64,7 @@ namespace LanceCertoSQL.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,ImovelId,UsuarioId,ValorMinimo,DataInicio,DataFim,Status")] Pregao pregao)
         {
+            
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors);
@@ -89,7 +93,14 @@ namespace LanceCertoSQL.Controllers
                 return NotFound();
             }
 
-            var pregao = await _context.Pregoes.FindAsync(id);
+            var pregao = await _context.Pregoes
+                .Include(p => p.Imovel)
+                .Include(p => p.Usuario)
+                .Include(p => p.Lances)
+                    .ThenInclude(l => l.Usuario)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+
             if (pregao == null)
             {
                 return NotFound();
@@ -97,6 +108,7 @@ namespace LanceCertoSQL.Controllers
             ViewData["ImovelId"] = new SelectList(_context.Imoveis, "Id", "Nome", pregao?.ImovelId);
             ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "Nome", pregao?.UsuarioId);
             ViewData["Status"] = new SelectList(Enum.GetValues(typeof(StatusPregao)), pregao.Status);
+
 
             return View(pregao);
         }
@@ -106,39 +118,51 @@ namespace LanceCertoSQL.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ImovelId,UsuarioId,ValorMinimo,DataInicio,DataFim,Status")] Pregao pregao)
+        public async Task<IActionResult> Edit(int id, Pregao pregao)
         {
             if (id != pregao.Id)
             {
+                Console.WriteLine("🔎 O id recebido não corresponde ao pregao.Id");
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) // Aqui a verificação deve ser de inválido (!ModelState.IsValid)
             {
-                try
+                Console.WriteLine("❌ ModelState inválido no Edit POST");
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
                 {
-                    _context.Update(pregao);
-                    await _context.SaveChangesAsync();
+                    Console.WriteLine("Erro de validação: " + error.ErrorMessage);
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PregaoExists(pregao.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["ImovelId"] = new SelectList(_context.Imoveis, "Id", "Nome", pregao?.ImovelId);
-            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "Nome", pregao?.UsuarioId);
-            ViewData["Status"] = new SelectList(Enum.GetValues(typeof(StatusPregao)), pregao.Status);
-            return View(pregao);
-        }
 
+                ViewData["ImovelId"] = new SelectList(_context.Imoveis, "Id", "Nome", pregao?.ImovelId);
+                ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "Nome", pregao?.UsuarioId);
+                ViewData["Status"] = new SelectList(Enum.GetValues(typeof(StatusPregao)), pregao.Status);
+
+                return View(pregao);
+            }
+
+            try
+            {
+                Console.WriteLine($"📝 Atualizando pregão {pregao.Id} com ValorMinimo: {pregao.ValorMinimo}");
+                _context.Update(pregao);
+                await _context.SaveChangesAsync();
+                Console.WriteLine("✅ Atualização realizada com sucesso.");
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                Console.WriteLine("⚠️ Erro de concorrência: " + ex.Message);
+                if (!PregaoExists(pregao.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
         // GET: Pregoes/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -173,6 +197,37 @@ namespace LanceCertoSQL.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        // GET: Pregoes/Finalizar/5
+        public async Task<IActionResult> Finalizar(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var pregao = await _context.Pregoes
+                .Include(p => p.Lances)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (pregao == null) return NotFound();
+
+            var maiorLance = pregao.Lances.OrderByDescending(l => l.Valor).FirstOrDefault();
+
+            if (maiorLance != null)
+            {
+                pregao.UsuarioVencedorId = maiorLance.UsuarioId;
+                pregao.NomeVencedor = (await _context.Usuarios.FindAsync(maiorLance.UsuarioId))?.Nome;
+                pregao.Status = StatusPregao.Finalizado;
+            }
+            else
+            {
+                pregao.UsuarioVencedorId = null;
+                pregao.NomeVencedor = "Não houve vencedor";
+                pregao.Status = StatusPregao.Finalizado;
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Details), new { id = pregao.Id });
+        }
+
 
         private bool PregaoExists(int id)
         {
