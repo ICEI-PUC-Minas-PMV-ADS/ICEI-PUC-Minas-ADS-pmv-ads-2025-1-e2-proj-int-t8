@@ -56,9 +56,9 @@ namespace LanceCertoSQL.Controllers
             // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
             [HttpPost]
             [ValidateAntiForgeryToken]
-            public async Task<IActionResult> Create([Bind("Id,Nome,Foto,Cidade,ValorEstimado,UsuarioId")] Imovel imovel)
-            {
-                if (ModelState.IsValid)
+            public async Task<IActionResult> Create([Bind("Id,Nome,Foto,Cidade,ValorEstimado,UsuarioId,Descricao")] Imovel imovel)
+        {
+            if (ModelState.IsValid)
                 {
                     _context.Add(imovel);
                     await _context.SaveChangesAsync();
@@ -97,8 +97,9 @@ namespace LanceCertoSQL.Controllers
             [HttpPost]
             [ValidateAntiForgeryToken]
             public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Foto,Cidade,ValorEstimado,UsuarioId")] Imovel imovel)
+
             {
-                if (id != imovel.Id)
+            if (id != imovel.Id)
                 {
                     return NotFound();
                 }

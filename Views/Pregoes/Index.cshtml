@@ -1,65 +1,58 @@
 ﻿@model IEnumerable<LanceCertoSQL.Models.Pregao>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Leilões Disponíveis";
 }
 
-<h1>Index</h1>
+<h2 class="mb-4">Leilões Disponíveis</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
+<div class="mb-3 text-end">
+    <a asp-action="Create" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Novo Leilão
+    </a>
+</div>
+
+<table class="table table-bordered table-hover table-striped align-middle rounded">
+    <thead class="table-dark">
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Imovel)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Usuario)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ValorMinimo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DataInicio)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DataFim)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th></th>
+            <th>Imóvel</th>
+            <th>Usuário</th>
+            <th>Valor Mínimo</th>
+            <th>Início</th>
+            <th>Fim</th>
+            <th>Status</th>
+            <th style="width:200px">Ações</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Imovel.Nome)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Usuario.Nome)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ValorMinimo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DataInicio)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DataFim)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="7" class="text-center text-muted">Nenhum leilão cadastrado.</td>
+            </tr>
+        }
+        else
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Imovel?.Nome</td>
+                    <td>@item.Usuario?.Nome</td>
+                    <td>R$ @item.ValorMinimo.ToString("N0")</td>
+                    <td>@item.DataInicio.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@item.DataFim.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@item.Status</td>
+                    <td>
+                        <div class="d-flex flex-wrap gap-1">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" aria-label="Editar leilão">Editar</a>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" aria-label="Ver detalhes do leilão">Detalhes</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" aria-label="Excluir leilão">Excluir</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
     </tbody>
 </table>
+
+
