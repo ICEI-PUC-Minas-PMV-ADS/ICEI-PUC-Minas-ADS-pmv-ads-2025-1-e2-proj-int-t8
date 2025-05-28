@@ -3,41 +3,36 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using LanceCertoSQL.Models;
 
 namespace LanceCertoSQL.Controllers
 {
     public class UsuariosController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly UserManager<Usuario> _userManager;
 
-        public UsuariosController(AppDbContext context)
+        public UsuariosController(UserManager<Usuario> userManager)
         {
-            _context = context;
+            _userManager = userManager;
         }
 
         // GET: Usuarios
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Usuarios.ToListAsync());
+            var usuarios = _userManager.Users.ToList();
+            return View(usuarios);
         }
 
         // GET: Usuarios/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(string id)
         {
-            if (id == null)
-            {
+            if (string.IsNullOrEmpty(id))
                 return NotFound();
-            }
 
-            var usuario = await _context.Usuarios
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var usuario = await _userManager.FindByIdAsync(id);
             if (usuario == null)
-            {
                 return NotFound();
-            }
 
             return View(usuario);
         }
@@ -49,92 +44,79 @@ namespace LanceCertoSQL.Controllers
         }
 
         // POST: Usuarios/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Email,Senha,FotoPerfil,Status,CRECI,DataNascimento,Estado")] Usuario usuario)
+        public async Task<IActionResult> Create([Bind("UserName,Email,Nome,FotoPerfil,Status,CRECI,DataNascimento,Estado,PasswordHash")] Usuario usuario)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(usuario);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
+                var result = await _userManager.CreateAsync(usuario, usuario.PasswordHash);
+                if (result.Succeeded)
+                    return RedirectToAction(nameof(Index));
 
-            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-            {
-                Console.WriteLine("Erro de validação: " + error.ErrorMessage);
+                foreach (var error in result.Errors)
+                    ModelState.AddModelError(string.Empty, error.Description);
             }
-
             return View(usuario);
         }
 
         // GET: Usuarios/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(string id)
         {
-            if (id == null)
-            {
+            if (string.IsNullOrEmpty(id))
                 return NotFound();
-            }
 
-            var usuario = await _context.Usuarios.FindAsync(id);
+            var usuario = await _userManager.FindByIdAsync(id);
             if (usuario == null)
-            {
                 return NotFound();
-            }
+
             return View(usuario);
         }
 
         // POST: Usuarios/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Email,Senha,FotoPerfil,Status,CRECI,DataNascimento,Estado")] Usuario usuario)
+        public async Task<IActionResult> Edit(string id, [Bind("Id,UserName,Email,Nome,FotoPerfil,Status,CRECI,DataNascimento,Estado")] Usuario usuario)
         {
             if (id != usuario.Id)
-            {
                 return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(usuario);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UsuarioExists(usuario.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                var existingUser = await _userManager.FindByIdAsync(id);
+                if (existingUser == null)
+                    return NotFound();
+
+                // Update the IdentityUser fields
+                existingUser.UserName = usuario.UserName;
+                existingUser.Email = usuario.Email;
+                existingUser.Nome = usuario.Nome;
+                existingUser.FotoPerfil = usuario.FotoPerfil;
+                existingUser.Status = usuario.Status;
+                existingUser.CRECI = usuario.CRECI;
+                existingUser.DataNascimento = usuario.DataNascimento;
+                existingUser.Estado = usuario.Estado;
+
+                var result = await _userManager.UpdateAsync(existingUser);
+                if (result.Succeeded)
+                    return RedirectToAction(nameof(Index));
+
+                foreach (var error in result.Errors)
+                    ModelState.AddModelError(string.Empty, error.Description);
             }
+
             return View(usuario);
         }
 
         // GET: Usuarios/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(string id)
         {
-            if (id == null)
-            {
+            if (string.IsNullOrEmpty(id))
                 return NotFound();
-            }
 
-            var usuario = await _context.Usuarios
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var usuario = await _userManager.FindByIdAsync(id);
             if (usuario == null)
-            {
                 return NotFound();
-            }
 
             return View(usuario);
         }
@@ -142,21 +124,25 @@ namespace LanceCertoSQL.Controllers
         // POST: Usuarios/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var usuario = await _context.Usuarios.FindAsync(id);
+            var usuario = await _userManager.FindByIdAsync(id);
             if (usuario != null)
             {
-                _context.Usuarios.Remove(usuario);
+                var result = await _userManager.DeleteAsync(usuario);
+                if (!result.Succeeded)
+                {
+                    foreach (var error in result.Errors)
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    return View(usuario);
+                }
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool UsuarioExists(int id)
+        private bool UsuarioExists(string id)
         {
-            return _context.Usuarios.Any(e => e.Id == id);
+            return _userManager.Users.Any(e => e.Id == id);
         }
     }
 }
