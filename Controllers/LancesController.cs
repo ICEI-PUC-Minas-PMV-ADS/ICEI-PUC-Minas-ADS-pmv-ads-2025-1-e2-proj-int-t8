@@ -6,16 +6,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LanceCertoSQL.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace LanceCertoSQL.Controllers
 {
     public class LancesController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<Usuario> _userManager;
 
-        public LancesController(AppDbContext context)
+        public LancesController(AppDbContext context, UserManager<Usuario> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Lances
@@ -48,15 +51,13 @@ namespace LanceCertoSQL.Controllers
         // GET: Lances/Create
         public IActionResult Create()
         {
-            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "Nome");
+            ViewData["UsuarioId"] = new SelectList(_userManager.Users.ToList(), "Id", "Nome");
             ViewData["PregaoId"] = new SelectList(_context.Pregoes.Include(p => p.Imovel)
                 .Select(p => new { p.Id, NomePregao = p.Imovel.Nome }), "Id", "NomePregao");
             return View();
         }
 
         // POST: Lances/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,UsuarioId,PregaoId,Valor,DataHora")] Lance lance)
@@ -67,7 +68,7 @@ namespace LanceCertoSQL.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "Nome", lance.UsuarioId);
+            ViewData["UsuarioId"] = new SelectList(_userManager.Users.ToList(), "Id", "Nome", lance.UsuarioId);
             ViewData["PregaoId"] = new SelectList(_context.Pregoes.Include(p => p.Imovel)
                 .Select(p => new { p.Id, NomePregao = p.Imovel.Nome }), "Id", "NomePregao", lance.PregaoId);
             return View(lance);
@@ -86,15 +87,13 @@ namespace LanceCertoSQL.Controllers
             {
                 return NotFound();
             }
-            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "Nome", lance.UsuarioId);
+            ViewData["UsuarioId"] = new SelectList(_userManager.Users.ToList(), "Id", "Nome", lance.UsuarioId);
             ViewData["PregaoId"] = new SelectList(_context.Pregoes.Include(p => p.Imovel)
                 .Select(p => new { p.Id, NomePregao = p.Imovel.Nome }), "Id", "NomePregao", lance.PregaoId);
             return View(lance);
         }
 
         // POST: Lances/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,UsuarioId,PregaoId,Valor,DataHora")] Lance lance)
@@ -124,7 +123,7 @@ namespace LanceCertoSQL.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "Nome", lance.UsuarioId);
+            ViewData["UsuarioId"] = new SelectList(_userManager.Users.ToList(), "Id", "Nome", lance.UsuarioId);
             ViewData["PregaoId"] = new SelectList(_context.Pregoes.Include(p => p.Imovel)
                 .Select(p => new { p.Id, NomePregao = p.Imovel.Nome }), "Id", "NomePregao", lance.PregaoId);
             return View(lance);

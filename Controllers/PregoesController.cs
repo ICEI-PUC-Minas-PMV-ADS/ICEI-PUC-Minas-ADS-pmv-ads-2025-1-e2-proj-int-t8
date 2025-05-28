@@ -6,16 +6,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LanceCertoSQL.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace LanceCertoSQL.Controllers
 {
     public class PregoesController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<Usuario> _userManager;
 
-        public PregoesController(AppDbContext context)
+        public PregoesController(AppDbContext context, UserManager<Usuario> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Pregoes
@@ -36,8 +39,8 @@ namespace LanceCertoSQL.Controllers
             var pregao = await _context.Pregoes
                 .Include(p => p.Imovel)
                 .Include(p => p.Usuario)
-                .Include(p => p.Lances)                      // Inclui a lista de lances
-                    .ThenInclude(l => l.Usuario)             // Inclui o usuário de cada lance
+                .Include(p => p.Lances)
+                    .ThenInclude(l => l.Usuario)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (pregao == null)
@@ -52,19 +55,16 @@ namespace LanceCertoSQL.Controllers
         public IActionResult Create()
         {
             ViewData["ImovelId"] = new SelectList(_context.Imoveis, "Id", "Nome");
-            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "Nome");
+            ViewData["UsuarioId"] = new SelectList(_userManager.Users.ToList(), "Id", "Nome");
             ViewData["Status"] = new SelectList(Enum.GetValues(typeof(StatusPregao)));
             return View();
         }
 
         // POST: Pregoes/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,ImovelId,UsuarioId,ValorMinimo,DataInicio,DataFim,Status")] Pregao pregao)
         {
-            
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors);
@@ -74,7 +74,7 @@ namespace LanceCertoSQL.Controllers
                 }
 
                 ViewData["ImovelId"] = new SelectList(_context.Imoveis, "Id", "Nome", pregao?.ImovelId);
-                ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "Nome", pregao?.UsuarioId);
+                ViewData["UsuarioId"] = new SelectList(_userManager.Users.ToList(), "Id", "Nome", pregao?.UsuarioId);
                 ViewData["Status"] = new SelectList(Enum.GetValues(typeof(StatusPregao)), pregao.Status);
 
                 return View(pregao);
@@ -100,22 +100,18 @@ namespace LanceCertoSQL.Controllers
                     .ThenInclude(l => l.Usuario)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
-
             if (pregao == null)
             {
                 return NotFound();
             }
             ViewData["ImovelId"] = new SelectList(_context.Imoveis, "Id", "Nome", pregao?.ImovelId);
-            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "Nome", pregao?.UsuarioId);
+            ViewData["UsuarioId"] = new SelectList(_userManager.Users.ToList(), "Id", "Nome", pregao?.UsuarioId);
             ViewData["Status"] = new SelectList(Enum.GetValues(typeof(StatusPregao)), pregao.Status);
-
 
             return View(pregao);
         }
 
         // POST: Pregoes/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Pregao pregao)
@@ -126,7 +122,7 @@ namespace LanceCertoSQL.Controllers
                 return NotFound();
             }
 
-            if (!ModelState.IsValid) // Aqui a verificação deve ser de inválido (!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 Console.WriteLine("❌ ModelState inválido no Edit POST");
                 foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
@@ -135,7 +131,7 @@ namespace LanceCertoSQL.Controllers
                 }
 
                 ViewData["ImovelId"] = new SelectList(_context.Imoveis, "Id", "Nome", pregao?.ImovelId);
-                ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "Nome", pregao?.UsuarioId);
+                ViewData["UsuarioId"] = new SelectList(_userManager.Users.ToList(), "Id", "Nome", pregao?.UsuarioId);
                 ViewData["Status"] = new SelectList(Enum.GetValues(typeof(StatusPregao)), pregao.Status);
 
                 return View(pregao);
@@ -143,7 +139,6 @@ namespace LanceCertoSQL.Controllers
 
             try
             {
-                Console.WriteLine($"📝 Atualizando pregão {pregao.Id} com ValorMinimo: {pregao.ValorMinimo}");
                 _context.Update(pregao);
                 await _context.SaveChangesAsync();
                 Console.WriteLine("✅ Atualização realizada com sucesso.");
@@ -163,6 +158,7 @@ namespace LanceCertoSQL.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
         // GET: Pregoes/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -214,7 +210,7 @@ namespace LanceCertoSQL.Controllers
             if (maiorLance != null)
             {
                 pregao.UsuarioVencedorId = maiorLance.UsuarioId;
-                pregao.NomeVencedor = (await _context.Usuarios.FindAsync(maiorLance.UsuarioId))?.Nome;
+                pregao.NomeVencedor = (await _userManager.FindByIdAsync(maiorLance.UsuarioId.ToString()))?.Nome;
                 pregao.Status = StatusPregao.Finalizado;
             }
             else
@@ -228,10 +224,10 @@ namespace LanceCertoSQL.Controllers
             return RedirectToAction(nameof(Details), new { id = pregao.Id });
         }
 
-
         private bool PregaoExists(int id)
         {
             return _context.Pregoes.Any(e => e.Id == id);
         }
     }
 }
+

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace LanceCertoSQL.Models
 {
@@ -8,24 +9,12 @@ namespace LanceCertoSQL.Models
         Administrador = 1
     }
 
-    public class Usuario
+    public class Usuario : IdentityUser
     {
-        public int Id { get; set; }
-
         [Required(ErrorMessage = "O nome é obrigatório.")]
         [StringLength(100)]
         [Display(Name = "Nome do Usuário")]
         public string Nome { get; set; }
-
-        [Required(ErrorMessage = "O e-mail é obrigatório.")]
-        [EmailAddress]
-        [Display(Name = "E-mail")]
-        public string Email { get; set; }
-
-        [Required(ErrorMessage = "A senha é obrigatória.")]
-        [DataType(DataType.Password)]
-        [Display(Name = "Senha")]
-        public string Senha { get; set; }
 
         [Display(Name = "Foto de Perfil")]
         public string? FotoPerfil { get; set; }
@@ -44,8 +33,10 @@ namespace LanceCertoSQL.Models
         [Display(Name = "Estado")]
         public string? Estado { get; set; }
 
+        // Relacionamento com imóveis
         public ICollection<Imovel>? Imoveis { get; set; }
     }
 }
+
 
 

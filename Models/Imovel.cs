@@ -25,13 +25,11 @@ namespace LanceCertoSQL.Models
 
         [Required(ErrorMessage = "É necessário selecionar o proprietário.")]
         [Display(Name = "Proprietário")]
-        public int UsuarioId { get; set; }
+        public string UsuarioId { get; set; }  // Alterado de int para string
         public Usuario? Usuario { get; set; }
-        
+
         [Display(Name = "Descrição")]
         [DataType(DataType.MultilineText)]
         public string? Descricao { get; set; }
-
     }
 }
-

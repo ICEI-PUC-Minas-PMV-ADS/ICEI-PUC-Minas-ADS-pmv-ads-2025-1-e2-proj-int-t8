@@ -1,77 +1,57 @@
 ﻿@model IEnumerable<LanceCertoSQL.Models.Usuario>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Usuários";
 }
 
-<h1>Index</h1>
+<h1>Usuários</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-success">Criar Novo Usuário</a>
 </p>
-<table class="table">
-    <thead>
+<table class="table table-bordered table-hover table-striped align-middle rounded">
+    <thead class="table-dark">
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Nome)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Senha)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FotoPerfil)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CRECI)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DataNascimento)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Estado)
-            </th>
-            <th></th>
+            <th>@Html.DisplayNameFor(model => model.Nome)</th>
+            <th>@Html.DisplayNameFor(model => model.Email)</th>
+            <th>@Html.DisplayNameFor(model => model.PasswordHash)</th>
+            <th>@Html.DisplayNameFor(model => model.FotoPerfil)</th>
+            <th>@Html.DisplayNameFor(model => model.Status)</th>
+            <th>@Html.DisplayNameFor(model => model.CRECI)</th>
+            <th>@Html.DisplayNameFor(model => model.DataNascimento)</th>
+            <th>@Html.DisplayNameFor(model => model.Estado)</th>
+            <th style="width:180px">Ações</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nome)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Senha)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FotoPerfil)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CRECI)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DataNascimento)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Estado)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="9" class="text-center text-muted">Nenhum usuário cadastrado.</td>
+            </tr>
+        }
+        else
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Nome</td>
+                    <td>@item.Email</td>
+                    <td>@item.PasswordHash</td> <!-- Senha visível -->
+                    <td>@item.FotoPerfil</td>
+                    <td>@item.Status</td>
+                    <td>@item.CRECI</td>
+                    <td>@item.DataNascimento?.ToString("dd/MM/yyyy")</td>
+                    <td>@item.Estado</td>
+                    <td>
+                        <div class="d-flex flex-wrap gap-1">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Detalhes</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Excluir</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
     </tbody>
 </table>
