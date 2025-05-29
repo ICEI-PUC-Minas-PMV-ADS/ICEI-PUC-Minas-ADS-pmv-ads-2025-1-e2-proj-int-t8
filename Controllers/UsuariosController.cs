@@ -46,14 +46,16 @@ namespace LanceCertoSQL.Controllers
         // POST: Usuarios/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("UserName,Email,Nome,FotoPerfil,Status,CRECI,DataNascimento,Estado,PasswordHash")] Usuario usuario)
+        public async Task<IActionResult> Create([Bind("UserName,Email,Nome,FotoPerfil,Status,CRECI,DataNascimento,Estado")] Usuario usuario, string Password)
         {
             if (ModelState.IsValid)
             {
-                var result = await _userManager.CreateAsync(usuario, usuario.PasswordHash);
+                // Usa a senha recebida do form
+                var result = await _userManager.CreateAsync(usuario, Password);
                 if (result.Succeeded)
                     return RedirectToAction(nameof(Index));
 
+                // Se houver erros, adiciona-os ao ModelState
                 foreach (var error in result.Errors)
                     ModelState.AddModelError(string.Empty, error.Description);
             }
