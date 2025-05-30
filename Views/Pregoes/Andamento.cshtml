@@ -1,0 +1,57 @@
+﻿@model LanceCertoSQL.ViewModels.LeilaoAndamentoViewModel
+
+@{
+    ViewData["Title"] = "Andamento do Leilão";
+}
+
+<h1>Andamento do Leilão</h1>
+
+<h3>@Model.ImovelNome - @Model.ImovelCidade</h3>
+<p>Valor mínimo: @Model.ValorMinimo.ToString("C")</p>
+<p>Status: @Model.StatusLeilao</p>
+
+<h4>Lances</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Usuário</th>
+            <th>Valor</th>
+            <th>Data/Hora</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var lance in Model.Lances)
+        {
+            <tr>
+                <td>@lance.NomeUsuario</td>
+                <td>@lance.Valor.ToString("C")</td>
+                <td>@lance.DataHora.ToString("g")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (Model.StatusLeilao == "Finalizado")
+{
+    <h4>🏆 Leilão Finalizado!</h4>
+    <p><strong>Vencedor:</strong> @Model.NomeVencedor</p>
+    <p><strong>Valor do lance vencedor:</strong> @Model.ValorVencedor?.ToString("C")</p>
+}
+else if (Model.UsuarioAtualEhVendedor)
+{
+    <form asp-action="Finalizar" asp-route-id="@Model.LeilaoId" method="post">
+        <button type="submit" class="btn btn-danger">Finalizar Leilão</button>
+    </form>
+}
+else
+{
+    <h4>Dar um lance</h4>
+    <form asp-action="DarLance" asp-route-id="@Model.LeilaoId" method="post">
+        <div class="form-group">
+            <label for="valor">Valor do Lance</label>
+            <input type="number" step="0.01" class="form-control" name="valor" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Dar Lance</button>
+    </form>
+}
+

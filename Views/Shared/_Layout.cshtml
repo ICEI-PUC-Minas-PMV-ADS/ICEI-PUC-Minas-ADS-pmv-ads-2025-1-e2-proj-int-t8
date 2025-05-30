@@ -1,4 +1,7 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<LanceCertoSQL.Models.Usuario> SignInManager
+@inject UserManager<LanceCertoSQL.Models.Usuario> UserManager
+@{
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
     var action = ViewContext.RouteData.Values["action"]?.ToString();
 }
@@ -44,6 +47,23 @@
                         <li class="nav-item">
                             <a class="nav-link text-white" asp-controller="Lances" asp-action="Index">Lances</a>
                         </li>
+                        @*Link para login e o nome aparce na navabar apos logado*@
+                        @if (!SignInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-controller="Account" asp-action="Login">Login</a>
+                            </li>
+                        }
+                        else
+                        {
+                            var usuario = await UserManager.GetUserAsync(User);
+                            <li class="nav-item">
+                                <span class="nav-link text-white">Bem-vindo, @usuario.Nome</span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-controller="Account" asp-action="Logout">Logout</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>

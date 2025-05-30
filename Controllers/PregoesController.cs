@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LanceCertoSQL.Models;
 using Microsoft.AspNetCore.Identity;
+using LanceCertoSQL.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LanceCertoSQL.Controllers
 {
@@ -221,9 +223,99 @@ namespace LanceCertoSQL.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Details), new { id = pregao.Id });
+            return RedirectToAction("Andamento", "Pregoes", new { id = pregao.Id });
         }
 
+        // GET: Pregao/Andamento/5
+        [Authorize]
+        public async Task<IActionResult> Andamento(int id)
+        {
+            var pregao = await _context.Pregoes
+                .Include(p => p.Imovel)
+                .Include(p => p.Usuario) // Vendedor
+                .Include(p => p.Lances)
+                    .ThenInclude(l => l.Usuario)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (pregao == null)
+                return NotFound();
+
+            var usuarioAtual = await _userManager.GetUserAsync(User);
+            bool usuarioEhVendedor = pregao.UsuarioId == usuarioAtual.Id;
+
+            // Pegando o maior lance (vencedor)
+            var maiorLance = pregao.Lances.OrderByDescending(l => l.Valor).FirstOrDefault();
+
+            var viewModel = new LeilaoAndamentoViewModel
+            {
+                LeilaoId = pregao.Id,
+                ImovelNome = pregao.Imovel.Nome,
+                ImovelDescricao = pregao.Imovel.Descricao,
+                ImovelCidade = pregao.Imovel.Cidade,
+                ValorMinimo = pregao.ValorMinimo,
+                DataInicio = pregao.DataInicio,
+                DataFim = pregao.DataFim,
+                StatusLeilao = pregao.Status.ToString(),
+                NomeVendedor = pregao.Usuario.Nome,
+                UsuarioAtualEhVendedor = usuarioEhVendedor,
+                Lances = pregao.Lances
+                    .OrderByDescending(l => l.Valor)
+                    .Select(l => new LeilaoAndamentoViewModel.LanceViewModel
+                    {
+                        NomeUsuario = l.Usuario.Nome,
+                        Valor = l.Valor,
+                        DataHora = l.DataHora
+                    }).ToList(),
+                NomeVencedor = pregao.NomeVencedor,  // Aqui pega do banco
+                ValorVencedor = maiorLance?.Valor   // Se tiver vencedor, mostra valor
+            };
+
+            return View(viewModel);
+        }
+
+        //Action, dar Lance
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> DarLance(int id, decimal valor)
+        {
+            var pregao = await _context.Pregoes
+                .Include(p => p.Lances)
+                .Include(p => p.Imovel)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (pregao == null)
+            {
+                return NotFound();
+            }
+
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null)
+            {
+                return Unauthorized();
+            }
+
+            // Validação: Valor mínimo e lance superior ao maior atual
+            decimal maiorLance = pregao.Lances.Any() ? pregao.Lances.Max(l => l.Valor) : pregao.ValorMinimo;
+            if (valor <= maiorLance)
+            {
+                ModelState.AddModelError("", $"O valor do lance deve ser maior que o lance atual: {maiorLance:C}");
+                return RedirectToAction("Andamento", new { id });
+            }
+
+            var novoLance = new Lance
+            {
+                PregaoId = id,
+                UsuarioId = usuario.Id,
+                Valor = valor,
+                DataHora = DateTime.Now
+            };
+
+            _context.Lances.Add(novoLance);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Andamento", new { id });
+        }
         private bool PregaoExists(int id)
         {
             return _context.Pregoes.Any(e => e.Id == id);
