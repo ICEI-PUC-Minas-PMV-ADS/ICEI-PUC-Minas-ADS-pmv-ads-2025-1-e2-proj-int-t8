@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using LanceCertoSQL.Models;
+using Microsoft.AspNetCore.Authorization;
+using LanceCertoSQL.ViewModels;
 
 namespace LanceCertoSQL.Controllers
 {
@@ -50,12 +52,10 @@ namespace LanceCertoSQL.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Usa a senha recebida do form
                 var result = await _userManager.CreateAsync(usuario, Password);
                 if (result.Succeeded)
                     return RedirectToAction(nameof(Index));
 
-                // Se houver erros, adiciona-os ao ModelState
                 foreach (var error in result.Errors)
                     ModelState.AddModelError(string.Empty, error.Description);
             }
@@ -89,7 +89,6 @@ namespace LanceCertoSQL.Controllers
                 if (existingUser == null)
                     return NotFound();
 
-                // Update the IdentityUser fields
                 existingUser.UserName = usuario.UserName;
                 existingUser.Email = usuario.Email;
                 existingUser.Nome = usuario.Nome;
@@ -142,9 +141,32 @@ namespace LanceCertoSQL.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // 🔥 Aqui entra a Action de perfil exclusiva do usuário final
+        [Authorize]
+        public async Task<IActionResult> PerfilUsuario()
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null)
+                return RedirectToAction("Login", "Account");
+
+            var model = new UsuarioPerfilViewModel
+            {
+                Nome = usuario.Nome,
+                UserName = usuario.UserName,
+                FotoPerfil = usuario.FotoPerfil,
+                DataNascimento = usuario.DataNascimento,
+                Estado = usuario.Estado,
+                Status = usuario.Status,
+                CRECI = usuario.CRECI
+            };
+
+            return View(model);
+        }
+
         private bool UsuarioExists(string id)
         {
             return _userManager.Users.Any(e => e.Id == id);
         }
     }
 }
+

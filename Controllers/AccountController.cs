@@ -31,7 +31,8 @@ namespace LanceCertoSQL.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
-            ViewData["ReturnUrl"] = returnUrl;
+            // Você pode remover a ViewData["ReturnUrl"] se for desnecessária
+            // ViewData["ReturnUrl"] = returnUrl;
             if (!ModelState.IsValid)
                 return View(model);
 
@@ -42,7 +43,6 @@ namespace LanceCertoSQL.Controllers
             {
                 try
                 {
-                    // Primeiro, vamos verificar se o usuário existe
                     var user = await _userManager.FindByNameAsync(model.UserName);
                     if (user == null)
                     {
@@ -51,16 +51,15 @@ namespace LanceCertoSQL.Controllers
                         return View(model);
                     }
 
-                    // Tenta autenticar com a senha
                     var result = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, lockoutOnFailure: false);
                     if (result.Succeeded)
                     {
                         Console.WriteLine($"Login bem-sucedido para o usuário: {model.UserName}");
-                        return RedirectToLocal(returnUrl);
+                        // 🔥 Redireciona diretamente para a página de perfil do usuário
+                        return RedirectToAction("PerfilUsuario", "Usuarios");
                     }
                     else
                     {
-                        // Se falhar, detalha o motivo
                         if (result.IsLockedOut)
                         {
                             Console.WriteLine($"Usuário '{model.UserName}' bloqueado por muitas tentativas.");
@@ -78,13 +77,12 @@ namespace LanceCertoSQL.Controllers
                             Console.WriteLine($"Tentativa {attempt}: Senha incorreta para o usuário '{model.UserName}'.");
                         }
 
-                        // Se falhar por senha, para na primeira tentativa
                         if (attempt == maxAttempts)
                         {
                             ModelState.AddModelError(string.Empty, "Falha ao fazer login. Verifique as credenciais.");
                             return View(model);
                         }
-                        break; // Para de tentar se senha estiver errada
+                        break;
                     }
                 }
                 catch (SqlException ex) when (ex.Number == 40613)
@@ -100,9 +98,6 @@ namespace LanceCertoSQL.Controllers
 
             return View(model);
         }
-
-
-
 
 
         // GET: Account/Logout

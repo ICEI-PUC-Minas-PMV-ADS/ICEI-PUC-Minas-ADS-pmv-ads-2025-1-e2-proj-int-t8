@@ -58,12 +58,13 @@
                         {
                             var usuario = await UserManager.GetUserAsync(User);
                             <li class="nav-item">
-                                <span class="nav-link text-white">Bem-vindo, @usuario.Nome</span>
+                                <a class="nav-link text-white" asp-controller="Usuarios" asp-action="PerfilUsuario">Bem-vindo, @usuario.Nome</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-white" asp-controller="Account" asp-action="Logout">Logout</a>
                             </li>
                         }
+
                     </ul>
                 </div>
             </div>
