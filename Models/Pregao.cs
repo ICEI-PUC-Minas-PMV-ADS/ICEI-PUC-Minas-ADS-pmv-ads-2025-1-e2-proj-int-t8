@@ -25,7 +25,7 @@ namespace LanceCertoSQL.Models
 
         [Required]
         [Display(Name = "Dono do Pregão")]
-        public int UsuarioId { get; set; }
+        public string UsuarioId { get; set; }  // Alterado de int para string
 
         [ForeignKey("UsuarioId")]
         public Usuario? Usuario { get; set; }
@@ -45,6 +45,20 @@ namespace LanceCertoSQL.Models
 
         [Required]
         public StatusPregao Status { get; set; }
+
+        [Display(Name = "Usuário Vencedor")]
+        public string? UsuarioVencedorId { get; set; }  // Alterado de int? para string?
+
+        [ForeignKey("UsuarioVencedorId")]
+        public Usuario? UsuarioVencedor { get; set; }
+
+        [Display(Name = "Nome do Vencedor")]
+        public string? NomeVencedor { get; set; }
+
+        [NotMapped]
+        public List<Lance> Lances { get; set; } = new List<Lance>();
     }
 }
+
+
 

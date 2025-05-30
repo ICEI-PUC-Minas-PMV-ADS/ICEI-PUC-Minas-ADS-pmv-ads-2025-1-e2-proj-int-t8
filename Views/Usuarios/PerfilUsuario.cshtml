@@ -1,0 +1,40 @@
+﻿@model LanceCertoSQL.ViewModels.UsuarioPerfilViewModel
+
+@{
+    ViewData["Title"] = "Meu Perfil";
+}
+
+<h1>Meu Perfil</h1>
+
+<div class="card shadow-sm" style="max-width: 400px;">
+    @if (!string.IsNullOrEmpty(Model.FotoPerfil))
+    {
+        <img src="@Model.FotoPerfil" alt="Foto de Perfil" class="card-img-top" style="height: 200px; object-fit: cover;" />
+    }
+    else
+    {
+        <img src="https://via.placeholder.com/400x200.png?text=Foto+de+Perfil" alt="Foto Padrão" class="card-img-top" />
+    }
+
+    <div class="card-body">
+        <h5 class="card-title">@Model.Nome (@Model.UserName)</h5>
+        <p class="card-text">
+            <strong>Data de Nascimento:</strong> @Model.DataNascimento?.ToString("dd/MM/yyyy")<br />
+            <strong>Estado:</strong> @Model.Estado<br />
+            @if (Model.Status == LanceCertoSQL.Models.StatusConta.Administrador)
+            {
+                <strong>Status da Conta:</strong> @Model.Status
+
+                <br />
+            }
+            <strong>CRECI:</strong> @Model.CRECI
+        </p>
+        <hr />
+        <a asp-action="EditarPerfilUsuario" asp-controller="Usuarios" class="btn btn-primary mb-2">Editar Perfil</a><br />
+        <a asp-action="Index" asp-controller="Pregoes" class="btn btn-secondary mb-2">Meus Leilões</a><br />
+        <a asp-action="Create" asp-controller="Pregoes" class="btn btn-secondary mb-2">Criar Leilão</a><br />
+        <a asp-action="Create" asp-controller="Imoveis" class="btn btn-secondary mb-2">Cadastrar Imóvel</a><br />
+        <a asp-action="Index" asp-controller="Imoveis" class="btn btn-secondary mb-2">Buscar Imóveis</a>
+    </div>
+</div>
+

@@ -10,9 +10,9 @@ namespace LanceCertoSQL.Models
 
         [Required]
         [Display(Name = "Usuário")]
-        public int UsuarioId { get; set; }
+        public string UsuarioId { get; set; }  // Alterado de int para string
 
-        [ForeignKey(nameof(UsuarioId))] // Forma mais clara de mapear
+        [ForeignKey(nameof(UsuarioId))]  // Mapeamento para a chave string
         public Usuario? Usuario { get; set; }
 
         [Required]
@@ -32,5 +32,6 @@ namespace LanceCertoSQL.Models
         public DateTime DataHora { get; set; } = DateTime.Now;
     }
 }
+
 
 

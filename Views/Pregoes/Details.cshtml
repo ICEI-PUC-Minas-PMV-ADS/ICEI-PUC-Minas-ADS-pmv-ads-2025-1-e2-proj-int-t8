@@ -10,45 +10,82 @@
     <h4>Pregao</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Imovel)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Imovel.Cidade)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Imovel.Nome)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Usuario)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Usuario.Email)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Usuario.Nome)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.ValorMinimo)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.ValorMinimo)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.DataInicio)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.DataInicio)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.DataFim)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.DataFim)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Status)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Status)
         </dd>
     </dl>
+
+    @if (Model.Lances != null && Model.Lances.Any())
+    {
+        <h4>Lances (Ordenados do maior para o menor)</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Usuário</th>
+                    <th>Valor do Lance</th>
+                    <th>Data/Hora</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var lance in Model.Lances.OrderByDescending(l => l.Valor))
+                {
+                    <tr>
+                        <td>@lance.Usuario?.Nome</td>
+                        <td>@lance.Valor.ToString("C")</td>
+                        <td>@lance.DataHora</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p><em>Não há lances registrados para este pregão.</em></p>
+    }
+
+    @if (Model.Status == LanceCertoSQL.Models.StatusPregao.Ativo)
+    {
+        <div>
+            <a asp-action="Finalizar" asp-route-id="@Model?.Id" class="btn btn-danger">Finalizar Pregão</a>
+        </div>
+    }
 </div>
+
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
+

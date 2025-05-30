@@ -1,14 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using LanceCertoSQL.Models;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<Usuario>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-    public DbSet<Usuario> Usuarios { get; set; }
+
     public DbSet<Imovel> Imoveis { get; set; }
     public DbSet<Pregao> Pregoes { get; set; }
     public DbSet<Lance> Lances { get; set; }
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -22,11 +22,10 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Imovel>()
             .HasOne(i => i.Usuario)
-            .WithMany()
+            .WithMany(u => u.Imoveis)
             .HasForeignKey(i => i.UsuarioId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        //Para o Lance
         modelBuilder.Entity<Lance>()
             .HasOne(l => l.Usuario)
             .WithMany()
@@ -35,10 +34,22 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Lance>()
             .HasOne(l => l.Pregao)
-            .WithMany()
+            .WithMany(p => p.Lances)
             .HasForeignKey(l => l.PregaoId)
             .OnDelete(DeleteBehavior.Restrict);
-    }
 
+        modelBuilder.Entity<Pregao>()
+            .Property(p => p.ValorMinimo)
+            .HasColumnType("decimal(18,2)");
+
+        modelBuilder.Entity<Imovel>()
+            .Property(i => i.ValorEstimado)
+            .HasColumnType("decimal(18,2)");
+
+        modelBuilder.Entity<Lance>()
+            .Property(l => l.Valor)
+            .HasColumnType("decimal(18,2)");
+    }
 }
+
 
