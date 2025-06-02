@@ -163,6 +163,103 @@ namespace LanceCertoSQL.Controllers
             return View(model);
         }
 
+        //Action EditarPerfilUsuario
+        [Authorize]
+        public async Task<IActionResult> EditarPerfilUsuario()
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var model = new EditarPerfilUsuarioViewModel
+            {
+                Nome = usuario.Nome,
+                DataNascimento = usuario.DataNascimento,
+                Estado = usuario.Estado,
+                CRECI = usuario.CRECI
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> EditarPerfilUsuario(EditarPerfilUsuarioViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Atualiza os dados básicos
+            usuario.Nome = model.Nome;
+            usuario.DataNascimento = model.DataNascimento;
+            usuario.Estado = model.Estado;
+            usuario.CRECI = model.CRECI;
+
+            // Upload da foto de perfil
+            if (model.FotoPerfil != null)
+            {
+                // Cria o diretório se não existir
+                var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img", "perfis");
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+
+                // Gera nome único e caminho completo do arquivo
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.FotoPerfil.FileName);
+                var filePath = Path.Combine(directoryPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.FotoPerfil.CopyToAsync(stream);
+                }
+
+                // Salva o caminho relativo no banco
+                usuario.FotoPerfil = "/img/perfis/" + fileName;
+            }
+
+            // Troca de senha, se preenchido
+            if (!string.IsNullOrEmpty(model.NovaSenha))
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(usuario);
+                var result = await _userManager.ResetPasswordAsync(usuario, token, model.NovaSenha);
+                if (!result.Succeeded)
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                    return View(model);
+                }
+            }
+
+            // Atualiza o usuário
+            var updateResult = await _userManager.UpdateAsync(usuario);
+            if (!updateResult.Succeeded)
+            {
+                foreach (var error in updateResult.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+                return View(model);
+            }
+
+            return RedirectToAction("PerfilUsuario");
+        }
+
+
+
         private bool UsuarioExists(string id)
         {
             return _userManager.Users.Any(e => e.Id == id);
