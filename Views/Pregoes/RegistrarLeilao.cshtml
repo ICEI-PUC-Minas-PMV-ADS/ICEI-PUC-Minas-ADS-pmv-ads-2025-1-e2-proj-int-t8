@@ -1,0 +1,39 @@
+﻿@model LanceCertoSQL.ViewModels.PregaoCreateViewModel
+
+@{
+    ViewData["Title"] = "Cadastrar Novo Leilão";
+}
+
+<h1>Cadastrar Novo Leilão</h1>
+
+<form asp-action="RegistrarLeilao" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="ImovelId" class="control-label">Imóvel</label>
+        <select asp-for="ImovelId" class="form-control" asp-items="Model.ImoveisDisponiveis"></select>
+        <span asp-validation-for="ImovelId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ValorMinimo" class="control-label">Valor Mínimo</label>
+        <input asp-for="ValorMinimo" class="form-control" />
+        <span asp-validation-for="ValorMinimo" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="DataInicio" class="control-label">Data de Início</label>
+        <input asp-for="DataInicio" class="form-control" type="datetime-local" value="@Model.DataInicio.ToString("yyyy-MM-ddTHH:mm")" />
+        <span asp-validation-for="DataInicio" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="DataFim" class="control-label">Data de Fim</label>
+        <input asp-for="DataFim" class="form-control" type="datetime-local" value="@Model.DataFim.ToString("yyyy-MM-ddTHH:mm")" />
+        <span asp-validation-for="DataFim" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Cadastrar Leilão</button>
+    <a asp-action="Index" asp-controller="Pregoes" class="btn btn-secondary">Cancelar</a>
+</form>
+
