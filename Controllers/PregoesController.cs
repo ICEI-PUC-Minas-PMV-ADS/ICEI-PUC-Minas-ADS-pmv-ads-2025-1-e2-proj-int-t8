@@ -409,6 +409,75 @@ namespace LanceCertoSQL.Controllers
             return RedirectToAction("Andamento", new { id = pregao.Id });
         }
 
+        //Action: Lista Filtrada
+        [Authorize]
+        public async Task<IActionResult> ListaFiltrada(string cidade, string faixaValor, string dono, string status)
+        {
+            var usuarioAtual = await _userManager.GetUserAsync(User);
+
+            // Base da query
+            var query = _context.Pregoes
+                .Include(p => p.Imovel)
+                .Include(p => p.Usuario)
+                .AsQueryable();
+
+            // Filtro: Cidade
+            if (!string.IsNullOrEmpty(cidade))
+            {
+                query = query.Where(p => p.Imovel.Cidade == cidade);
+            }
+
+            // Filtro: Faixa de valor
+            if (!string.IsNullOrEmpty(faixaValor))
+            {
+                if (faixaValor == "<1000")
+                    query = query.Where(p => p.ValorMinimo < 400000);
+                else if (faixaValor == "1000-5000")
+                    query = query.Where(p => p.ValorMinimo >= 400000 && p.ValorMinimo <= 900000);
+                else if (faixaValor == ">5000")
+                    query = query.Where(p => p.ValorMinimo > 900000);
+            }
+
+            // Filtro: Dono
+            if (dono == "Meus")
+            {
+                query = query.Where(p => p.UsuarioId == usuarioAtual.Id);
+            }
+
+            // Filtro: Status
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(p => p.Status.ToString() == status);
+            }
+
+            // Montar lista de cidades disponíveis (distintas do banco)
+            var cidadesDisponiveis = await _context.Imoveis
+                .Select(i => i.Cidade)
+                .Distinct()
+                .ToListAsync();
+
+            // Montar resultado
+            var model = new PregaoListaViewModel
+            {
+                CidadeSelecionada = cidade,
+                FaixaValorSelecionada = faixaValor,
+                DonoSelecionado = dono,
+                StatusSelecionado = status,
+                CidadesDisponiveis = cidadesDisponiveis,
+                Leiloes = await query.Select(p => new PregaoListaViewModel.PregaoItemViewModel
+                {
+                    Id = p.Id,
+                    ImovelNome = p.Imovel.Nome,
+                    Cidade = p.Imovel.Cidade,
+                    ValorMinimo = p.ValorMinimo,
+                    Status = p.Status.ToString(),
+                    NomeDono = p.Usuario.Nome
+                }).ToListAsync()
+            };
+
+            return View(model);
+        }
+
 
         private bool PregaoExists(int id)
         {
