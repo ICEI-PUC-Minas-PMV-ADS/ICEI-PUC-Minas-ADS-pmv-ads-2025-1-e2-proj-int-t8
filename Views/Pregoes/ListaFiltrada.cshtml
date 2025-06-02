@@ -1,0 +1,85 @@
+﻿@model LanceCertoSQL.ViewModels.PregaoListaViewModel
+
+@{
+    ViewData["Title"] = "Lista de Leilões Filtrados";
+}
+
+<h1>Lista de Leilões</h1>
+
+<form method="get" asp-action="ListaFiltrada" class="mb-4">
+    <div class="row">
+        <div class="col-md-3">
+            <label for="cidade">Cidade</label>
+            <select name="cidade" class="form-control">
+                <option value="">Todas</option>
+                @foreach (var cidade in Model.CidadesDisponiveis)
+                {
+                    <option value="@cidade" selected="@(cidade == Model.CidadeSelecionada ? "selected" : null)">@cidade</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label for="faixaValor">Faixa de Valor</label>
+            <select name="faixaValor" class="form-control">
+                <option value="">Todas</option>
+                @foreach (var faixa in Model.FaixasValor)
+                {
+                    <option value="@faixa" selected="@(faixa == Model.FaixaValorSelecionada ? "selected" : null)">@faixa</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label for="dono">Dono</label>
+            <select name="dono" class="form-control">
+                <option value="Todos" selected="@(Model.DonoSelecionado == "Todos" ? "selected" : null)">Todos</option>
+                <option value="Meus" selected="@(Model.DonoSelecionado == "Meus" ? "selected" : null)">Meus Leilões</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label for="status">Status</label>
+            <select name="status" class="form-control">
+                <option value="">Todos</option>
+                <option value="Pendente" selected="@(Model.StatusSelecionado == "Pendente" ? "selected" : null)">Pendente</option>
+                <option value="Ativo" selected="@(Model.StatusSelecionado == "Ativo" ? "selected" : null)">Ativo</option>
+                <option value="Finalizado" selected="@(Model.StatusSelecionado == "Finalizado" ? "selected" : null)">Finalizado</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">Aplicar Filtros</button>
+        <a asp-action="ListaFiltrada" class="btn btn-secondary">Limpar</a>
+    </div>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Imóvel</th>
+            <th>Cidade</th>
+            <th>Valor Mínimo</th>
+            <th>Status</th>
+            <th>Dono</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var leilao in Model.Leiloes)
+        {
+            <tr>
+                <td>@leilao.ImovelNome</td>
+                <td>@leilao.Cidade</td>
+                <td>@leilao.ValorMinimo.ToString("C")</td>
+                <td>@leilao.Status</td>
+                <td>@leilao.NomeDono</td>
+                <td>
+                    <a asp-action="Andamento" asp-route-id="@leilao.Id" class="btn btn-info">Andamento</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
