@@ -39,9 +39,18 @@
 }
 else if (Model.UsuarioAtualEhVendedor)
 {
-    <form asp-action="Finalizar" asp-route-id="@Model.LeilaoId" method="post">
-        <button type="submit" class="btn btn-danger">Finalizar Leilão</button>
-    </form>
+    if (Model.StatusLeilao == "Pendente")
+    {
+        <form asp-action="Iniciar" asp-route-id="@Model.LeilaoId" method="post">
+            <button type="submit" class="btn btn-success">Iniciar Leilão</button>
+        </form>
+    }
+    else
+    {
+        <form asp-action="Finalizar" asp-route-id="@Model.LeilaoId" method="post">
+            <button type="submit" class="btn btn-danger">Finalizar Leilão</button>
+        </form>
+    }
 }
 else
 {

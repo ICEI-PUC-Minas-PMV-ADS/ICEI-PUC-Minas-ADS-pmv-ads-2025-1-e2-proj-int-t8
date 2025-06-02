@@ -316,6 +316,100 @@ namespace LanceCertoSQL.Controllers
 
             return RedirectToAction("Andamento", new { id });
         }
+
+        //GET: Registrar Leilão
+
+        [Authorize]
+        public async Task<IActionResult> RegistrarLeilao()
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Pega os imóveis do usuário
+            var imoveis = _context.Imoveis
+                            .Where(i => i.UsuarioId == usuario.Id)
+                            .Select(i => new SelectListItem
+                            {
+                                Value = i.Id.ToString(),
+                                Text = i.Nome // Se não tem Nome, podemos usar "Imóvel ID #"
+                            }).ToList();
+
+            var model = new PregaoCreateViewModel
+            {
+                ImoveisDisponiveis = imoveis,
+                DataInicio = DateTime.Now,
+                DataFim = DateTime.Now.AddDays(7) // Padrão para 7 dias depois
+            };
+
+            return View(model);
+        }
+
+        //POST: Registrar leilão
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> RegistrarLeilao(PregaoCreateViewModel model)
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            if (ModelState.IsValid)
+            {
+                var pregao = new Pregao
+                {
+                    ImovelId = model.ImovelId,
+                    UsuarioId = usuario.Id,
+                    ValorMinimo = model.ValorMinimo,
+                    DataInicio = model.DataInicio,
+                    DataFim = model.DataFim,
+                    Status = StatusPregao.Pendente
+                };
+
+                _context.Pregoes.Add(pregao);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Index"); // Vai para a lista de leilões após cadastro
+            }
+
+            // Se der erro, recarrega os imóveis
+            model.ImoveisDisponiveis = _context.Imoveis
+                .Where(i => i.UsuarioId == usuario.Id)
+                .Select(i => new SelectListItem
+                {
+                    Value = i.Id.ToString(),
+                    Text = i.Nome
+                }).ToList();
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Iniciar(int id)
+        {
+            var pregao = await _context.Pregoes.FindAsync(id);
+            if (pregao == null)
+                return NotFound();
+
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null || pregao.UsuarioId != usuario.Id)
+                return Forbid(); // Garante que só o vendedor possa iniciar
+
+            if (pregao.Status == StatusPregao.Pendente)
+            {
+                pregao.Status = StatusPregao.Ativo;
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Andamento", new { id = pregao.Id });
+        }
+
+
         private bool PregaoExists(int id)
         {
             return _context.Pregoes.Any(e => e.Id == id);
