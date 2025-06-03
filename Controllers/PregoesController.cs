@@ -409,7 +409,7 @@ namespace LanceCertoSQL.Controllers
             return RedirectToAction("Andamento", new { id = pregao.Id });
         }
 
-        //Action: Lista Filtrada
+        //Action Lista Filtrada
         [Authorize]
         public async Task<IActionResult> ListaFiltrada(string cidade, string faixaValor, string dono, string status)
         {
@@ -430,12 +430,18 @@ namespace LanceCertoSQL.Controllers
             // Filtro: Faixa de valor
             if (!string.IsNullOrEmpty(faixaValor))
             {
-                if (faixaValor == "<1000")
-                    query = query.Where(p => p.ValorMinimo < 400000);
-                else if (faixaValor == "1000-5000")
-                    query = query.Where(p => p.ValorMinimo >= 400000 && p.ValorMinimo <= 900000);
-                else if (faixaValor == ">5000")
-                    query = query.Where(p => p.ValorMinimo > 900000);
+                switch (faixaValor)
+                {
+                    case "<400000":
+                        query = query.Where(p => p.ValorMinimo < 400_000);
+                        break;
+                    case "400000-900000":
+                        query = query.Where(p => p.ValorMinimo >= 400_000 && p.ValorMinimo <= 900_000);
+                        break;
+                    case ">900000":
+                        query = query.Where(p => p.ValorMinimo > 900_000);
+                        break;
+                }
             }
 
             // Filtro: Dono
@@ -444,10 +450,13 @@ namespace LanceCertoSQL.Controllers
                 query = query.Where(p => p.UsuarioId == usuarioAtual.Id);
             }
 
-            // Filtro: Status
+            // Filtro: Status (corrigido sem usar .ToString())
             if (!string.IsNullOrEmpty(status))
             {
-                query = query.Where(p => p.Status.ToString() == status);
+                if (Enum.TryParse<StatusPregao>(status, out var statusEnum))
+                {
+                    query = query.Where(p => p.Status == statusEnum);
+                }
             }
 
             // Montar lista de cidades disponíveis (distintas do banco)
