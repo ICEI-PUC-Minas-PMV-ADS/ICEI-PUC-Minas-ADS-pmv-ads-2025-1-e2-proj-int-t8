@@ -42,7 +42,7 @@ namespace LanceCertoSQL.Controllers
         // GET: Usuarios/Create
         public IActionResult Create()
         {
-            return View();
+            return RedirectToAction("Index", "Cadastro");
         }
 
         // POST: Usuarios/Create
