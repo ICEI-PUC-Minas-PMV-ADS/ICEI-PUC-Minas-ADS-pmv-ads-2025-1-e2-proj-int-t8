@@ -19,6 +19,8 @@ namespace LanceCertoSQL.Controllers
                 return View(model);
             }
 
+
+
             TempData["MensagemSucesso"] = "Usuário cadastrado com sucesso!";
             return RedirectToAction("Index");
         }
