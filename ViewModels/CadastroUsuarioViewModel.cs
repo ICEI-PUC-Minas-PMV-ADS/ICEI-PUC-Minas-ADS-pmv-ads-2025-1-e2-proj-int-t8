@@ -35,7 +35,8 @@ namespace LanceCertoSQL.ViewModels
         public string Complemento { get; set; }
 
         [Display(Name = "CRECI (se aplicável)")]
-        public string Creci { get; set; }
+        [DataType(DataType.Text)]
+        public string? Creci { get; set; }
 
         public Guid? Id { get; set; }
         public string Status { get; set; } = "Usuário Comum";
