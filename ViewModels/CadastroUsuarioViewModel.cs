@@ -8,6 +8,10 @@ namespace LanceCertoSQL.ViewModels
         [Required(ErrorMessage = "O nome de usuário é obrigatório.")]
         public string Username { get; set; }
 
+        [Required(ErrorMessage = "O e-mail é obrigatório.")]
+        [EmailAddress(ErrorMessage = "Digite um e-mail válido.")]
+        public string Email { get; set; }
+
         [Required(ErrorMessage = "O nome completo é obrigatório.")]
         [Display(Name = "Nome completo")]
         public string NomeCompleto { get; set; }
@@ -37,8 +41,5 @@ namespace LanceCertoSQL.ViewModels
         [Display(Name = "CRECI (se aplicável)")]
         [DataType(DataType.Text)]
         public string? Creci { get; set; }
-
-        public Guid? Id { get; set; }
-        public string Status { get; set; } = "Usuário Comum";
     }
 }
