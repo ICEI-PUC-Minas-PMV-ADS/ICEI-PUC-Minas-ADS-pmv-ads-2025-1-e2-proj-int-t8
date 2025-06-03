@@ -13,9 +13,15 @@
                 </div>
                 <div class="card-body">
 
-                    @if (TempData["MensagemSucesso"] != null)
+                    @if (ViewBag.MensagemSucesso != null)
                     {
-                        <div class="alert alert-success text-center">@Html.Raw(TempData["MensagemSucesso"])</div>
+                        <div class="alert alert-success text-center">@Html.Raw(ViewBag.MensagemSucesso)</div>
+
+                        <script>
+                            setTimeout(function () {
+                                window.location.href = '@Url.Action("Login", "Account")';
+                            }, 3000); // 3 segundos
+                        </script>
                     }
 
                     @if (TempData["MensagemErro"] != null)

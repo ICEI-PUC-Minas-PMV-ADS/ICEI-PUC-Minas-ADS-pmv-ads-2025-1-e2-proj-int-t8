@@ -43,8 +43,9 @@ namespace LanceCertoSQL.Controllers
 
             if (resultado.Succeeded)
             {
-                TempData["MensagemSucesso"] = "Usuário cadastrado com sucesso!";
-                return RedirectToAction("Index");
+                ViewBag.MensagemSucesso = "Usuário cadastrado com sucesso!";
+                ViewBag.Redirecionar = true;
+                return View();
             }
 
             TempData["MensagemErro"] = string.Join("<br>", resultado.Errors.Select(e => e.Description));
