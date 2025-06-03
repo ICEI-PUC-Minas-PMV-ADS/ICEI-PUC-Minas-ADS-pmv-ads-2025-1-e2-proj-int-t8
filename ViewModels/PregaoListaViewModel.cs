@@ -11,7 +11,13 @@ namespace LanceCertoSQL.ViewModels
         public List<string> CidadesDisponiveis { get; set; } = new List<string>();
 
         public string FaixaValorSelecionada { get; set; }
-        public List<string> FaixasValor { get; set; } = new List<string> { "<1000", "1000-5000", ">5000" };
+        public List<string> FaixasValor { get; set; } = new List<string>
+        {
+            "<400000",      // Interpretação: até R$400.000
+            "400000-900000",  // R$400.000 a R$900.000
+            ">900000"       // Acima de R$900.000
+        };
+
 
         public string DonoSelecionado { get; set; } // "Meus" ou "Todos"
         public string StatusSelecionado { get; set; } // Pendente, Ativo, Finalizado
