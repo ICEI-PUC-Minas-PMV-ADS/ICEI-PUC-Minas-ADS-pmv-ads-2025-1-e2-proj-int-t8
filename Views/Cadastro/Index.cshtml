@@ -4,93 +4,123 @@
     ViewData["Title"] = "Cadastro de Usuário";
 }
 
-<h2>Cadastro de Usuário</h2>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow rounded-3 animate__animated animate__fadeIn">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4>Cadastro de Usuário</h4>
+                </div>
+                <div class="card-body">
 
-@if (TempData["MensagemSucesso"] != null)
-{
-    <div class="alert alert-success">@TempData["MensagemSucesso"]</div>
-}
+                    @if (TempData["MensagemSucesso"] != null)
+                    {
+                        <div class="alert alert-success text-center">@Html.Raw(TempData["MensagemSucesso"])</div>
+                    }
 
-@if (TempData["MensagemErro"] != null)
-{
-    <div class="alert alert-danger">@Html.Raw(TempData["MensagemErro"])</div>
-}
+                    @if (TempData["MensagemErro"] != null)
+                    {
+                        <div class="alert alert-danger text-center">@Html.Raw(TempData["MensagemErro"])</div>
+                    }
 
+                    <form asp-action="Index" method="post" autocomplete="off">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Username" class="form-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    <input asp-for="Username" class="form-control" />
+                                </div>
+                                <span asp-validation-for="Username" class="text-danger"></span>
+                            </div>
 
-<form asp-action="Index" method="post" autocomplete="off">
-    <div class="form-group">
-        <label asp-for="Username"></label>
-        <input asp-for="Username" class="form-control" />
-        <span asp-validation-for="Username" class="text-danger"></span>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                    <input asp-for="Email" type="email" class="form-control" />
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="NomeCompleto" class="form-label"></label>
+                                <input asp-for="NomeCompleto" class="form-control" />
+                                <span asp-validation-for="NomeCompleto" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Senha" class="form-label"></label>
+                                <div class="input-group">
+                                    <input asp-for="Senha" id="senhaInput" type="password" class="form-control" />
+                                    <button class="btn btn-outline-secondary" type="button" onclick="toggleSenha()">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="Senha" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="DataNascimento" class="form-label"></label>
+                                <input asp-for="DataNascimento" type="date" class="form-control" />
+                                <span asp-validation-for="DataNascimento" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CEP" class="form-label"></label>
+                                <input asp-for="CEP" class="form-control" id="cep" />
+                                <span asp-validation-for="CEP" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Estado" class="form-label"></label>
+                                <input asp-for="Estado" class="form-control" id="estado" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Cidade" class="form-label"></label>
+                                <input asp-for="Cidade" class="form-control" id="cidade" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Bairro" class="form-label"></label>
+                                <input asp-for="Bairro" class="form-control" id="bairro" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Rua" class="form-label"></label>
+                                <input asp-for="Rua" class="form-control" id="rua" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Numero" class="form-label"></label>
+                                <input asp-for="Numero" class="form-control" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Complemento" class="form-label"></label>
+                                <input asp-for="Complemento" class="form-control" />
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="Creci" class="form-label"></label>
+                                <input asp-for="Creci" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5" id="btnCadastrar">
+                                <span id="btnText">Cadastrar</span>
+                                <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" type="email" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="NomeCompleto"></label>
-        <input asp-for="NomeCompleto" class="form-control" />
-        <span asp-validation-for="NomeCompleto" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Senha"></label>
-        <input asp-for="Senha" class="form-control" />
-        <span asp-validation-for="Senha" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="DataNascimento"></label>
-        <input asp-for="DataNascimento" type="date" class="form-control" />
-        <span asp-validation-for="DataNascimento" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="CEP"></label>
-        <input asp-for="CEP" class="form-control" id="cep" />
-        <span asp-validation-for="CEP" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Estado"></label>
-        <input asp-for="Estado" class="form-control" id="estado" />
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Cidade"></label>
-        <input asp-for="Cidade" class="form-control" id="cidade" />
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Bairro"></label>
-        <input asp-for="Bairro" class="form-control" id="bairro" />
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Rua"></label>
-        <input asp-for="Rua" class="form-control" id="rua" />
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Numero"></label>
-        <input asp-for="Numero" class="form-control" />
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Complemento"></label>
-        <input asp-for="Complemento" class="form-control" />
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Creci"></label>
-        <input asp-for="Creci" class="form-control" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Cadastrar</button>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
@@ -110,6 +140,17 @@
                         }
                     });
             }
+        });
+
+        function toggleSenha() {
+            const input = document.getElementById("senhaInput");
+            input.type = input.type === "password" ? "text" : "password";
+        }
+
+        document.querySelector("form").addEventListener("submit", function () {
+            document.getElementById("btnCadastrar").disabled = true;
+            document.getElementById("btnText").textContent = "Enviando...";
+            document.getElementById("btnSpinner").classList.remove("d-none");
         });
     </script>
 }
