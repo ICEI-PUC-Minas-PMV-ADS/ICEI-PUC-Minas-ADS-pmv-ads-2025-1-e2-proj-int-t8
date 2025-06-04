@@ -15,6 +15,16 @@ namespace LanceCertoSQL.Controllers
 
         public IActionResult Index()
         {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("PerfilUsuario", "Usuarios");
+            }
+
+            return RedirectToAction("Landing", "Home");
+        }
+
+        public IActionResult Landing()
+        {
             return View();
         }
 
