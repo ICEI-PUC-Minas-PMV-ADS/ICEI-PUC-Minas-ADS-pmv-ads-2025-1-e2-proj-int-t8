@@ -35,9 +35,16 @@ namespace LanceCertoSQL.Controllers
                 Nome = model.NomeCompleto,
                 DataNascimento = model.DataNascimento,
                 Estado = model.Estado,
+                Cidade = model.Cidade,
+                Bairro = model.Bairro,
+                Rua = model.Rua,
+                Numero = model.Numero,
+                Complemento = model.Complemento,
+                CEP = model.CEP,
                 CRECI = model.Creci,
                 Status = StatusConta.Comum
             };
+
 
             var resultado = await _userManager.CreateAsync(usuario, model.Senha);
 
