@@ -19,14 +19,12 @@ namespace LanceCertoSQL.Controllers
             _userManager = userManager;
         }
 
-        // GET: Usuarios
         public async Task<IActionResult> Index()
         {
             var usuarios = _userManager.Users.ToList();
             return View(usuarios);
         }
 
-        // GET: Usuarios/Details/5
         public async Task<IActionResult> Details(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -39,13 +37,11 @@ namespace LanceCertoSQL.Controllers
             return View(usuario);
         }
 
-        // GET: Usuarios/Create
         public IActionResult Create()
         {
             return RedirectToAction("Index", "Cadastro");
         }
 
-        // POST: Usuarios/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("UserName,Email,Nome,FotoPerfil,Status,CRECI,DataNascimento,Estado")] Usuario usuario, string Password)
@@ -62,7 +58,6 @@ namespace LanceCertoSQL.Controllers
             return View(usuario);
         }
 
-        // GET: Usuarios/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -75,7 +70,6 @@ namespace LanceCertoSQL.Controllers
             return View(usuario);
         }
 
-        // POST: Usuarios/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("Id,UserName,Email,Nome,FotoPerfil,Status,CRECI,DataNascimento,Estado")] Usuario usuario)
@@ -109,7 +103,6 @@ namespace LanceCertoSQL.Controllers
             return View(usuario);
         }
 
-        // GET: Usuarios/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -122,7 +115,6 @@ namespace LanceCertoSQL.Controllers
             return View(usuario);
         }
 
-        // POST: Usuarios/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
@@ -141,7 +133,6 @@ namespace LanceCertoSQL.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // 🔥 Aqui entra a Action de perfil exclusiva do usuário final
         [Authorize]
         public async Task<IActionResult> PerfilUsuario()
         {
@@ -157,13 +148,19 @@ namespace LanceCertoSQL.Controllers
                 DataNascimento = usuario.DataNascimento,
                 Estado = usuario.Estado,
                 Status = usuario.Status,
-                CRECI = usuario.CRECI
+                CRECI = usuario.CRECI,
+
+                CEP = usuario.CEP,
+                Cidade = usuario.Cidade,
+                Bairro = usuario.Bairro,
+                Rua = usuario.Rua,
+                Numero = usuario.Numero,
+                Complemento = usuario.Complemento
             };
 
             return View(model);
         }
 
-        //Action EditarPerfilUsuario
         [Authorize]
         public async Task<IActionResult> EditarPerfilUsuario()
         {
@@ -206,29 +203,25 @@ namespace LanceCertoSQL.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // Atualiza os dados básicos
-            usuario.Nome = model.Nome;
-            usuario.DataNascimento = model.DataNascimento;
-            usuario.Estado = model.Estado;
-            usuario.Cidade = model.Cidade;
-            usuario.Bairro = model.Bairro;
-            usuario.Rua = model.Rua;
-            usuario.Numero = model.Numero;
-            usuario.Complemento = model.Complemento;
-            usuario.CEP = model.CEP;
-            usuario.CRECI = model.CRECI;
+            usuario.Nome = model.Nome ?? usuario.Nome;
+            usuario.DataNascimento = model.DataNascimento ?? usuario.DataNascimento;
+            usuario.Estado = string.IsNullOrWhiteSpace(model.Estado) ? usuario.Estado : model.Estado;
+            usuario.Cidade = string.IsNullOrWhiteSpace(model.Cidade) ? usuario.Cidade : model.Cidade;
+            usuario.Bairro = string.IsNullOrWhiteSpace(model.Bairro) ? usuario.Bairro : model.Bairro;
+            usuario.Rua = string.IsNullOrWhiteSpace(model.Rua) ? usuario.Rua : model.Rua;
+            usuario.Numero = string.IsNullOrWhiteSpace(model.Numero) ? usuario.Numero : model.Numero;
+            usuario.Complemento = string.IsNullOrWhiteSpace(model.Complemento) ? usuario.Complemento : model.Complemento;
+            usuario.CEP = string.IsNullOrWhiteSpace(model.CEP) ? usuario.CEP : model.CEP;
+            usuario.CRECI = string.IsNullOrWhiteSpace(model.CRECI) ? usuario.CRECI : model.CRECI;
 
-            // Upload da foto de perfil
             if (model.FotoPerfil != null)
             {
-                // Cria o diretório se não existir
                 var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img", "perfis");
                 if (!Directory.Exists(directoryPath))
                 {
                     Directory.CreateDirectory(directoryPath);
                 }
 
-                // Gera nome único e caminho completo do arquivo
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.FotoPerfil.FileName);
                 var filePath = Path.Combine(directoryPath, fileName);
 
@@ -237,11 +230,9 @@ namespace LanceCertoSQL.Controllers
                     await model.FotoPerfil.CopyToAsync(stream);
                 }
 
-                // Salva o caminho relativo no banco
                 usuario.FotoPerfil = "/img/perfis/" + fileName;
             }
 
-            // Troca de senha, se preenchido
             if (!string.IsNullOrEmpty(model.NovaSenha))
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(usuario);
@@ -256,7 +247,6 @@ namespace LanceCertoSQL.Controllers
                 }
             }
 
-            // Atualiza o usuário
             var updateResult = await _userManager.UpdateAsync(usuario);
             if (!updateResult.Succeeded)
             {
