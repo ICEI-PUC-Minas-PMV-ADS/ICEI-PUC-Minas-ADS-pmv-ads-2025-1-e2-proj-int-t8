@@ -33,6 +33,24 @@ namespace LanceCertoSQL.Models
         [Display(Name = "Estado")]
         public string? Estado { get; set; }
 
+        [Display(Name = "Cidade")]
+        public string? Cidade { get; set; }
+
+        [Display(Name = "Bairro")]
+        public string? Bairro { get; set; }
+
+        [Display(Name = "Rua / Avenida")]
+        public string? Rua { get; set; }
+
+        [Display(Name = "Número")]
+        public string? Numero { get; set; }
+
+        [Display(Name = "Complemento")]
+        public string? Complemento { get; set; }
+
+        [Display(Name = "CEP")]
+        public string? CEP { get; set; }
+
         // Relacionamento com imóveis
         public ICollection<Imovel>? Imoveis { get; set; }
     }

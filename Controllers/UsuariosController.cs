@@ -178,6 +178,12 @@ namespace LanceCertoSQL.Controllers
                 Nome = usuario.Nome,
                 DataNascimento = usuario.DataNascimento,
                 Estado = usuario.Estado,
+                Cidade = usuario.Cidade,
+                Bairro = usuario.Bairro,
+                Rua = usuario.Rua,
+                Numero = usuario.Numero,
+                Complemento = usuario.Complemento,
+                CEP = usuario.CEP,
                 CRECI = usuario.CRECI
             };
 
@@ -204,6 +210,12 @@ namespace LanceCertoSQL.Controllers
             usuario.Nome = model.Nome;
             usuario.DataNascimento = model.DataNascimento;
             usuario.Estado = model.Estado;
+            usuario.Cidade = model.Cidade;
+            usuario.Bairro = model.Bairro;
+            usuario.Rua = model.Rua;
+            usuario.Numero = model.Numero;
+            usuario.Complemento = model.Complemento;
+            usuario.CEP = model.CEP;
             usuario.CRECI = model.CRECI;
 
             // Upload da foto de perfil
