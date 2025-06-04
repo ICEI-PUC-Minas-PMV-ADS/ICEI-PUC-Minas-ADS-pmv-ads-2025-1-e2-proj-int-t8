@@ -1,0 +1,30 @@
+﻿@{
+    ViewData["Title"] = "Bem-vindo";
+}
+
+<div class="container mt-5 text-center">
+    <h1 class="display-4 fw-bold">Bem-vindo ao <span class="text-primary">Lance Certo</span></h1>
+    <p class="lead text-muted mb-4">Sua plataforma de leilões de imóveis online — segura, acessível e fácil de usar.</p>
+
+    <div class="d-flex justify-content-center gap-3 mb-5">
+        <a class="btn btn-primary btn-lg" asp-controller="Account" asp-action="Login">Entrar</a>
+        <a class="btn btn-outline-secondary btn-lg" asp-controller="Cadastro" asp-action="Index">Criar Conta</a>
+    </div>
+
+    <hr class="my-5" />
+
+    <div class="row text-center">
+        <div class="col-md-4 mb-4">
+            <h5 class="fw-bold">Leilões em Tempo Real</h5>
+            <p class="text-muted">Participe de leilões com contagem regressiva e lances ao vivo em tempo real.</p>
+        </div>
+        <div class="col-md-4 mb-4">
+            <h5 class="fw-bold">Cadastro Simplificado</h5>
+            <p class="text-muted">Crie sua conta de forma rápida e tenha acesso total à plataforma.</p>
+        </div>
+        <div class="col-md-4 mb-4">
+            <h5 class="fw-bold">Transparência e Segurança</h5>
+            <p class="text-muted">Imóveis com informações completas e rastreabilidade dos lances.</p>
+        </div>
+    </div>
+</div>
