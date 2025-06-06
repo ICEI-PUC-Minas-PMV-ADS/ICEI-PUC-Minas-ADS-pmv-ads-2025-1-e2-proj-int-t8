@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LanceCertoSQL.Models;
 using Microsoft.AspNetCore.Identity;
+using LanceCertoSQL.ViewModels;
 
 namespace LanceCertoSQL.Controllers
 {
@@ -14,12 +15,16 @@ namespace LanceCertoSQL.Controllers
     {
         private readonly AppDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly IWebHostEnvironment _env;
 
-        public ImoveisController(AppDbContext context, UserManager<Usuario> userManager)
+
+        public ImoveisController(AppDbContext context, UserManager<Usuario> userManager, IWebHostEnvironment env)
         {
             _context = context;
             _userManager = userManager;
+            _env = env;
         }
+
 
         // GET: Imoveis
         public async Task<IActionResult> Index()
@@ -159,6 +164,124 @@ namespace LanceCertoSQL.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        //ACTION REGISTRAR IMOVEIS
+        [HttpGet]
+        public IActionResult RegistrarImovel()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegistrarImovel(ImovelCreateViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var usuario = await _userManager.GetUserAsync(User);
+
+            string? fotoPath = null;
+            if (model.FotoUpload != null && model.FotoUpload.Length > 0)
+            {
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(model.FotoUpload.FileName)}";
+                var uploads = Path.Combine(_env.WebRootPath, "img", "imoveis");
+
+                if (!Directory.Exists(uploads))
+                    Directory.CreateDirectory(uploads);
+
+                var filePath = Path.Combine(uploads, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.FotoUpload.CopyToAsync(stream);
+                }
+
+                fotoPath = $"/img/imoveis/{fileName}";
+            }
+
+            var imovel = new Imovel
+            {
+                Nome = model.Nome,
+                Cidade = model.Cidade,
+                ValorEstimado = model.ValorEstimado,
+                Descricao = model.Descricao,
+                Foto = fotoPath,
+                UsuarioId = usuario.Id
+            };
+
+            _context.Imoveis.Add(imovel);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index", "Home"); // Ou outro destino apropriado
+        }
+
+        //Action BuscarImoveis
+        [HttpGet]
+        public async Task<IActionResult> BuscarImoveis()
+        {
+            var model = new BuscarImovelViewModel
+            {
+                UsuariosDisponiveis = await _context.Users.ToListAsync()
+            };
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> BuscarImoveis(BuscarImovelViewModel model)
+        {
+            var query = _context.Imoveis.Include(i => i.Usuario).AsQueryable();
+
+            if (!string.IsNullOrEmpty(model.Cidade))
+                query = query.Where(i => i.Cidade.Contains(model.Cidade));
+
+            if (!string.IsNullOrEmpty(model.FaixaValor))
+            {
+                switch (model.FaixaValor)
+                {
+                    case "Até R$ 100.000":
+                        query = query.Where(i => i.ValorEstimado <= 100000);
+                        break;
+                    case "R$ 100.000 - R$ 500.000":
+                        query = query.Where(i => i.ValorEstimado > 100000 && i.ValorEstimado <= 500000);
+                        break;
+                    case "Acima de R$ 500.000":
+                        query = query.Where(i => i.ValorEstimado > 500000);
+                        break;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(model.UsuarioId))
+                query = query.Where(i => i.UsuarioId == model.UsuarioId);
+
+            var resultados = await query.ToListAsync();
+
+            var leiloesAtivos = await _context.Pregoes
+                .Where(l => l.Status == StatusPregao.Ativo)
+                .Select(l => l.ImovelId)
+                .ToListAsync();
+
+
+            ViewBag.LeiloesAtivos = leiloesAtivos;
+
+            // ⚠️ Monta o ViewModel completo de volta para a View
+            model.Resultados = resultados;
+
+            // Repopula listas de apoio se necessário
+            model.FaixasValor = new List<string>
+            {
+            "Até R$ 100.000",
+            "R$ 100.000 - R$ 500.000",
+            "Acima de R$ 500.000"
+            };
+
+            model.UsuariosDisponiveis = await _context.Users
+                .Select(u => new Usuario { Id = u.Id, Nome = u.Nome })
+                .ToListAsync();
+
+            return View(model);
+        }
+
+
 
         private bool ImovelExists(int id)
         {
