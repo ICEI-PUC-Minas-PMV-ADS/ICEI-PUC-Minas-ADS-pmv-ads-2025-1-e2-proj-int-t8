@@ -1,0 +1,89 @@
+﻿@model LanceCertoSQL.ViewModels.BuscarImovelViewModel
+
+@{
+    ViewData["Title"] = "Buscar Imóveis";
+}
+
+<h2>Buscar Imóveis</h2>
+
+<form asp-action="BuscarImoveis" method="post" class="mb-4">
+    <div class="form-row">
+        <div class="form-group col-md-3">
+            <label>Cidade</label>
+            <input type="text" asp-for="Cidade" class="form-control" placeholder="Digite a cidade" />
+        </div>
+
+        <div class="form-group col-md-3">
+            <label>Faixa de Valor</label>
+            <select asp-for="FaixaValor" class="form-control">
+                <option value="">Todas</option>
+                @foreach (var faixa in Model.FaixasValor)
+                {
+                    <option value="@faixa">@faixa</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group col-md-3">
+            <label>Dono</label>
+            <select asp-for="UsuarioId" class="form-control">
+                <option value="">Todos</option>
+                @foreach (var usuario in Model.UsuariosDisponiveis)
+                {
+                    <option value="@usuario.Id">@usuario.Nome</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group col-md-3">
+            <label>Tem Leilão Ativo?</label>
+            <select asp-for="TemLeilaoAtivo" class="form-control">
+                <option value="">Todos</option>
+                <option value="Sim">Sim</option>
+                <option value="Não">Não</option>
+            </select>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Buscar</button>
+</form>
+
+@if (Model.Resultados.Any())
+{
+    <h4>Resultados:</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Cidade</th>
+                <th>Valor Estimado</th>
+                <th>Dono</th>
+                <th>Leilão Ativo?</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Resultados)
+            {
+                <tr>
+                    <td>@item.Nome</td>
+                    <td>@item.Cidade</td>
+                    <td>@item.ValorEstimado.ToString("C")</td>
+                    <td>@item.Usuario?.UserName</td>
+                    <td>
+                        @{
+                            bool temLeilao = ViewBag.LeiloesAtivos != null &&
+                            ((List<int>)ViewBag.LeiloesAtivos).Contains(item.Id);
+                        }
+                        @(temLeilao ? "Sim" : "Não")
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+}
+else if (Context.Request.Method == "POST")
+{
+    <p>Nenhum imóvel encontrado com os filtros informados.</p>
+}
+
