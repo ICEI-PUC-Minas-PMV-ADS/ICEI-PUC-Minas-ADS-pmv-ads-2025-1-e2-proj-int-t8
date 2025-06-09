@@ -1,48 +1,62 @@
 ﻿@model LanceCertoSQL.Models.Imovel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalhes do Imóvel";
 }
 
-<h1>Details</h1>
+<!-- TÍTULO -->
+<div class="container mt-5">
+    <h2 class="mb-4">
+        <i class="bi bi-house-door-fill me-2"></i>Detalhes do Imóvel
+    </h2>
 
-<div>
-    <h4>Imovel</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nome)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nome)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Foto)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Foto)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Cidade)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Cidade)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ValorEstimado)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ValorEstimado)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Usuario)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Usuario.Email)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <div class="row">
+        <!-- COLUNA: FOTO -->
+        <div class="col-md-5 mb-3">
+            @if (!string.IsNullOrEmpty(Model.Foto))
+            {
+                <img src="@Model.Foto" class="img-fluid rounded shadow-sm border" alt="Foto do Imóvel">
+            }
+            else
+            {
+                <div class="bg-light border rounded text-center d-flex align-items-center justify-content-center" style="height: 300px;">
+                    <span class="text-muted">Foto não disponível</span>
+                </div>
+            }
+        </div>
+
+        <!-- COLUNA: DETALHES -->
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4"><i class="bi bi-card-text me-1"></i>Nome</dt>
+                        <dd class="col-sm-8">@Model.Nome</dd>
+
+                        <dt class="col-sm-4"><i class="bi bi-geo-alt-fill me-1"></i>Cidade</dt>
+                        <dd class="col-sm-8">@Model.Cidade</dd>
+
+                        <dt class="col-sm-4"><i class="bi bi-currency-dollar me-1"></i>Valor Estimado</dt>
+                        <dd class="col-sm-8">@Model.ValorEstimado.ToString("C")</dd>
+
+                        <dt class="col-sm-4"><i class="bi bi-person-badge-fill me-1"></i>Responsável</dt>
+                        <dd class="col-sm-8">@Model.Usuario?.Email</dd>
+
+                        <dt class="col-sm-4"><i class="bi bi-info-circle-fill me-1"></i>Descrição</dt>
+                        <dd class="col-sm-8">@Model.Descricao</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- BOTÕES -->
+            <div class="mt-4">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning me-2">
+                    <i class="bi bi-pencil-fill me-1"></i>Editar
+                </a>
+                <a asp-action="BuscarImoveis" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left-circle me-1"></i>Voltar para Busca
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
