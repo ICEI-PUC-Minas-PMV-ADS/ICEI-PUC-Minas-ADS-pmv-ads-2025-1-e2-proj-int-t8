@@ -59,6 +59,7 @@
                 <th>Valor Estimado</th>
                 <th>Dono</th>
                 <th>Leilão Ativo?</th>
+                <th>Link</th>
             </tr>
         </thead>
         <tbody>
@@ -76,9 +77,11 @@
                         }
                         @(temLeilao ? "Sim" : "Não")
                     </td>
+                    <td>
+                        <a asp-controller="Imoveis" asp-action="Details" asp-route-id="@item.Id">Ver Detalhes</a>
+                    </td>
                 </tr>
             }
-
         </tbody>
     </table>
 }
