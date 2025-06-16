@@ -48,45 +48,68 @@
     <button type="submit" class="btn btn-primary">Buscar</button>
 </form>
 
-@if (Model.Resultados.Any())
+@{
+    string usuarioLogadoId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+}
+
+@if (Model.Resultados != null && Model.Resultados.Any())
 {
     <h4>Resultados:</h4>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Cidade</th>
-                <th>Valor Estimado</th>
-                <th>Dono</th>
-                <th>Leilão Ativo?</th>
-                <th>Link</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.Resultados)
-            {
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle text-center bg-white shadow-sm">
+            <thead class="table-dark">
                 <tr>
-                    <td>@item.Nome</td>
-                    <td>@item.Cidade</td>
-                    <td>@item.ValorEstimado.ToString("C")</td>
-                    <td>@item.Usuario?.UserName</td>
-                    <td>
-                        @{
-                            bool temLeilao = ViewBag.LeiloesAtivos != null &&
-                            ((List<int>)ViewBag.LeiloesAtivos).Contains(item.Id);
-                        }
-                        @(temLeilao ? "Sim" : "Não")
-                    </td>
-                    <td>
-                        <a asp-controller="Imoveis" asp-action="Details" asp-route-id="@item.Id">Ver Detalhes</a>
-                    </td>
+                    <th>Foto</th>
+                    <th>Nome</th>
+                    <th>Cidade</th>
+                    <th>Valor Estimado</th>
+                    <th>Dono</th>
+                    <th>Leilão Ativo?</th>
+                    <th>Ações</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Resultados)
+                {
+                    var temLeilao = ViewBag.LeiloesAtivos != null &&
+                    ((List<int>)ViewBag.LeiloesAtivos).Contains(item.Id);
+
+                    <tr>
+                        <td style="width: 140px;">
+                            <img src="@(string.IsNullOrEmpty(item.Foto) ? "/img/no-image.png" : item.Foto)"
+                                 alt="Foto do Imóvel"
+                                 class="img-thumbnail"
+                                 style="height: 80px; object-fit: cover;" />
+                        </td>
+                        <td>@item.Nome</td>
+                        <td>@item.Cidade</td>
+                        <td>@item.ValorEstimado.ToString("C")</td>
+                        <td>@item.Usuario?.Nome</td>
+                        <td>@(temLeilao ? "Sim" : "Não")</td>
+                        <td>
+                            <a asp-controller="Imoveis" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info me-1 text-white">
+                                <i class="bi bi-eye"></i>
+                            </a>
+
+                            @if (item.UsuarioId == usuarioLogadoId)
+                            {
+                                <a asp-controller="Imoveis" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a asp-controller="Imoveis" asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 else if (Context.Request.Method == "POST")
 {
     <p>Nenhum imóvel encontrado com os filtros informados.</p>
 }
+
 
