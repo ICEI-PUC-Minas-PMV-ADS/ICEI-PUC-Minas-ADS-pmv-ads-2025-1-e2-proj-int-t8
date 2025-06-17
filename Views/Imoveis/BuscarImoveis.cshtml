@@ -55,6 +55,12 @@
 @if (Model.Resultados != null && Model.Resultados.Any())
 {
     <h4>Resultados:</h4>
+    <div class="alert alert-info d-flex justify-content-between align-items-center">
+        <span><strong>Encontrou um leilão do seu interesse?</strong></span>
+        <a asp-controller="Pregoes" asp-action="ListaFiltrada" class="btn btn-primary">
+            Clique aqui!
+        </a>
+    </div>
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center bg-white shadow-sm">
             <thead class="table-dark">

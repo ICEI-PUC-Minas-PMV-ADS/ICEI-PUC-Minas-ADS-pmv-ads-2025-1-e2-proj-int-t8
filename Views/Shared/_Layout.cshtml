@@ -43,10 +43,7 @@
                         @if (SignInManager.IsSignedIn(User))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-white" asp-controller="Usuarios" asp-action="Index">Usuários</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white" asp-controller="Imoveis" asp-action="Index">Imóveis</a>
+                                <a class="nav-link text-white" asp-controller="Imoveis" asp-action="BuscarImoveis">Imóveis</a>
                             </li>
                             @*
                             <li class="nav-item">
@@ -57,10 +54,7 @@
                             *@
 
                             <li class="nav-item">
-                                <a class="nav-link text-white" asp-controller="Pregoes" asp-action="Index">Pregões</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white" asp-controller="Lances" asp-action="Index">Lances</a>
+                                <a class="nav-link text-white" asp-controller="Pregoes" asp-action="ListaFiltrada">Pregões</a>
                             </li>
                         }
                     </ul>
